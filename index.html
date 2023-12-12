@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>APINombres</title>
+</head>
+<body>
+<h1>API NOMBRES</h1>
+<form action="/nombres" method="post">
+    <input type="text" name="name" placeholder="Ingresa tu nombre" required>
+    <input type="submit" value="Enviar">
+</form>
+<ul id="nameList"></ul>
+<script defer type="module">
+    async function getNombres() {
+        return await fetch('http://localhost:3000/nombres').then(r => r.json())
+    }
+
+    async function renderNombres() {
+        const names = await getNombres()
+        const nameList = document.getElementById('nameList')
+        nameList.innerHTML = ''
+        names.forEach(name => {
+            const li = document.createElement('li')
+            li.innerText = name
+            nameList.appendChild(li)
+        })
+    }
+
+
+    await renderNombres()
+
+    const form = document.querySelector('form')
+
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault()
+        const formData = new FormData(form)
+        const name = formData.get('name')
+        await fetch('http://localhost:3000/nombres', {
+            method: 'POST',
+            body: JSON.stringify({name}),
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+        await renderNombres()
+        form.reset()
+    })
+
+</script>
+</body>
+</html>

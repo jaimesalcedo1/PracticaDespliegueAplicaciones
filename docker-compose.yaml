@@ -1,0 +1,45 @@
+services:
+  mongo-db:
+    container_name: despliegue-mongo-cont
+    image: mongo:5.0
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: testing
+      MONGO_INITDB_DATABASE: names
+    ports:
+      - 27018:27017
+    volumes:
+      - ./database:/data/db
+      - ./scripts-mongo/createUser.js:/docker-entrypoint-initdb.d/createUser.js:ro
+    networks:
+      - network-despliegue
+
+  node:
+    container_name: despliegue-node-cont
+    build:
+      context: .
+      dockerfile: Node.Dockerfile
+    restart: unless-stopped
+    ports:
+      - 3000:3000
+    depends_on:
+      - mongo-db
+    networks:
+      - network-despliegue
+
+  nginx:
+    container_name: despliegue-nginx-cont
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    ports:
+      - 8080:80
+    depends_on:
+      - node
+    networks:
+      - network-despliegue
+
+networks:
+  network-despliegue:
